@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>스프의 맛 — 앙상블</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;600;700;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+:root {
+  --ink:        #030201;
+  --bg:         #020100;
+  --cream:      #f8f0e2;
+  --cream2:     #c8bca8;
+  --gold:       #d4b054;
+  --gold-l:     #f2da80;
+  --gold-dim:   rgba(212,176,84,0.42);
+  --rust:       #8b3210;
+  --rust-l:     rgba(139,50,16,0.7);
+}
+
+html, body {
+  width: 100%; min-height: 100%;
+  background: #020100;
+  font-family: 'Noto Serif KR', serif;
+  color: var(--cream);
+  overflow-x: hidden;
+}
+
+/* ── 파티클 배경 ── */
+#cvs {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  opacity: 0.25;
+}
+
+/* ── 공통 래퍼 ── */
+.page {
+  position: relative; z-index: 1;
+  min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 0 0 60px;
+}
+
+/* ════════════════════════════
+   PHASE 0: 예고장 오프닝
+════════════════════════════ */
+#ph-opening {
+  justify-content: center;
+  min-height: 100vh;
+  padding: 40px 28px;
+  gap: 0;
+}
+
+/* 배경 그라디언트 */
+#ph-opening::before {
+  content: '';
+  position: fixed; inset: 0;
+  background: #060402;
+  z-index: -1;
+}
+
+.op-top-label {
+  font-family: 'IM Fell English', serif; font-style: italic;
+  font-size: 11px; letter-spacing: 0.45em; color: var(--gold); opacity: 0;
+  text-transform: uppercase; margin-bottom: 32px;
+  animation: fadeUp 1s ease 0.3s forwards;
+}
+
+.op-deco {
+  display: flex; align-items: center; gap: 12px;
+  width: min(480px, 88vw); margin-bottom: 24px; opacity: 0;
+  animation: fadeUp 1s ease 0.6s forwards;
+}
+.op-deco .l { flex: 1; height: 0.5px; background: linear-gradient(90deg, transparent, var(--gold) 60%, transparent); }
+.op-deco .d { width: 6px; height: 6px; background: var(--gold); transform: rotate(45deg); flex-shrink: 0; }
+.op-deco .d.sm { width: 3.5px; height: 3.5px; opacity: 0.4; }
+
+/* 날짜 스탬프 */
+.op-date {
+  font-family: 'Cormorant Garamond', serif; font-style: italic;
+  font-size: 12px; letter-spacing: 0.28em; color: var(--gold); opacity: 0;
+  margin-bottom: 16px;
+  animation: fadeUp 1s ease 0.9s forwards;
+}
+
+/* 예고 헤드라인 */
+.op-headline {
+  font-weight: 900; font-size: clamp(13px, 4.2vw, 17px);
+  line-height: 2.15; letter-spacing: 0.06em;
+  color: var(--cream); text-align: center;
+  width: min(460px, 90vw);
+  margin-bottom: 10px; opacity: 0;
+  animation: fadeUp 1.1s ease 1.3s forwards;
+  word-break: keep-all;
+}
+.op-headline .hl { color: var(--gold-l); }
+
+/* 붉은 강조 */
+.op-alert {
+  font-size: clamp(20px, 6vw, 28px); font-weight: 900;
+  letter-spacing: 0.04em; color: #e04020; text-align: center;
+  margin: 8px 0 24px; opacity: 0;
+  animation: fadeUp 1s ease 1.9s forwards, flickerRed 3s ease 3s infinite;
+  text-shadow: 0 0 30px rgba(220,60,20,0.5);
+}
+
+/* 의문부호 */
+.op-qmark {
+  font-family: 'Cormorant Garamond', serif; font-style: italic;
+  font-size: clamp(52px, 14vw, 72px); color: var(--rust);
+  line-height: 1; margin-bottom: 28px; opacity: 0;
+  animation: fadeUp 1s ease 2.2s forwards, flickerRed 4s ease 3s infinite;
+  text-shadow: 0 0 40px rgba(139,50,16,0.6);
+}
+
+/* 초대 버튼 */
+.op-cta {
+  position: relative; opacity: 0;
+  animation: fadeUp 1s ease 2.6s forwards;
+}
+.op-cta-btn {
+  background: transparent; border: 1px solid rgba(201,168,76,0.55);
+  color: var(--gold-l); cursor: pointer;
+  font-family: 'Noto Serif KR', serif; font-size: 14px; letter-spacing: 0.22em;
+  padding: 16px 56px; transition: all 0.4s ease;
+  position: relative; overflow: hidden;
+}
+.op-cta-btn::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(201,168,76,0.14), transparent);
+  opacity: 0; transition: opacity 0.4s;
+}
+.op-cta-btn:hover { border-color: var(--gold); color: var(--cream); transform: translateY(-2px); box-shadow: 0 10px 36px rgba(201,168,76,0.1); }
+.op-cta-btn:hover::before { opacity: 1; }
+.pulse-ring {
+  position: absolute; inset: -2px; border: 1px solid var(--gold);
+  opacity: 0; animation: pulseRing 2.5s ease-out 4s infinite;
+}
+
+.op-scroll-hint {
+  margin-top: 20px; font-size: 11px; letter-spacing: 0.25em;
+  color: rgba(201,168,76,0.35); opacity: 0;
+  animation: fadeUp 1s ease 3.2s forwards;
+}
+
+/* ════════════════════════════
+   PHASE 1: 질문 선택
+════════════════════════════ */
+#ph-qa {
+  padding: 52px 24px 64px;
+  display: none;
+  min-height: 100vh;
+  justify-content: flex-start;
+}
+
+#ph-qa::before {
+  content: '';
+  position: fixed; inset: 0;
+  background: #060402;
+  z-index: -1;
+}
+
+.qa-inner {
+  width: min(520px, 92vw);
+  display: flex; flex-direction: column; align-items: center;
+}
+
+.qa-section-label {
+  font-family: 'IM Fell English', serif; font-style: italic;
+  font-size: 10px; letter-spacing: 0.44em; color: var(--gold); opacity: 0.6;
+  text-transform: uppercase; margin-bottom: 20px;
+}
+
+.qa-prompt {
+  font-size: clamp(13px, 3.8vw, 15.5px); line-height: 2.2;
+  color: rgba(248,240,226,0.88); text-align: center;
+  letter-spacing: 0.06em; word-break: keep-all;
+  margin-bottom: 10px;
+}
+.qa-prompt strong { color: var(--cream); }
+
+.qa-invite {
+  font-family: 'Cormorant Garamond', serif; font-style: italic;
+  font-size: clamp(16px, 4.5vw, 21px); letter-spacing: 0.12em;
+  color: var(--gold-l); margin-bottom: 32px; text-align: center;
+}
+
+/* 질문 버튼들 */
+.q-grid {
+  width: 100%; display: flex; flex-direction: column; gap: 11px; margin-bottom: 32px;
+}
+.q-btn {
+  width: 100%; background: rgba(201,168,76,0.04);
+  border: 0.5px solid rgba(201,168,76,0.28); color: var(--cream);
+  cursor: pointer; font-family: 'Noto Serif KR', serif;
+  font-size: clamp(12.5px, 3.5vw, 14px); letter-spacing: 0.07em;
+  padding: 15px 20px; text-align: left; transition: all 0.35s ease;
+  display: flex; align-items: center; gap: 12px;
+  line-height: 1.6; word-break: keep-all;
+}
+.q-btn:hover {
+  border-color: var(--gold); background: rgba(201,168,76,0.09);
+  transform: translateX(4px); color: var(--gold-l);
+}
+.q-btn .q-icon {
+  font-size: 16px; flex-shrink: 0; opacity: 0.8;
+}
+.q-btn .q-num {
+  font-family: 'Cormorant Garamond', serif; font-style: italic;
+  font-size: 18px; color: var(--gold); opacity: 0.5;
+  flex-shrink: 0; width: 18px;
+}
+
+/* ════════════════════════════
+   PHASE 2: 답변 카드
+════════════════════════════ */
+#ph-ans {
+  padding: 52px 24px 64px;
+  display: none;
+  min-height: 100vh;
+  justify-content: flex-start;
+}
+
+#ph-ans::before {
+  content: '';
+  position: fixed; inset: 0;
+  background: #060402;
+  z-index: -1;
+}
+
+.ans-inner {
+  width: min(520px, 92vw);
+  display: flex; flex-direction: column; align-items: center;
+}
+
+.ans-q-label {
+  font-size: 10px; letter-spacing: 0.4em; color: var(--gold); opacity: 0.55;
+  font-family: 'IM Fell English', serif; font-style: italic;
+  text-transform: uppercase; margin-bottom: 18px;
+}
+
+.ans-q-text {
+  font-size: clamp(13px, 3.5vw, 15px); color: rgba(248,240,226,0.75);
+  text-align: center; letter-spacing: 0.06em; margin-bottom: 24px;
+  line-height: 1.8; word-break: keep-all;
+}
+
+.ans-card {
+  width: 100%; border: 1px solid rgba(201,168,76,0.38);
+  background: linear-gradient(160deg, rgba(201,168,76,0.1) 0%, rgba(5,2,0,0.85) 100%);
+  padding: 28px 26px; margin-bottom: 20px;
+  animation: revealCard 0.6s ease forwards;
+}
+.ans-card-label {
+  font-family: 'IM Fell English', serif; font-size: 9.5px;
+  letter-spacing: 0.44em; color: var(--gold); opacity: 0.65;
+  text-transform: uppercase; margin-bottom: 14px;
+}
+.ans-card-body {
+  font-size: clamp(13.5px, 3.8vw, 15.5px); line-height: 2.2;
+  color: var(--cream); letter-spacing: 0.05em; word-break: keep-all;
+}
+.ans-card-body em { color: var(--gold-l); font-style: normal; font-weight: 700; }
+.ans-card-body .ans-sub {
+  display: block; margin-top: 12px;
+  font-size: 12px; color: rgba(240,232,216,0.45); letter-spacing: 0.08em;
+}
+
+.ans-back-btn {
+  width: 100%; background: transparent;
+  border: 0.5px solid rgba(201,168,76,0.32); color: var(--gold);
+  cursor: pointer; font-family: 'Noto Serif KR', serif;
+  font-size: 13px; letter-spacing: 0.18em;
+  padding: 13px; transition: all 0.3s ease; margin-bottom: 10px;
+}
+.ans-back-btn:hover { border-color: var(--gold-l); color: var(--cream); background: rgba(201,168,76,0.06); }
+
+/* ════════════════════════════
+   PHASE 3: 피날레
+════════════════════════════ */
+#ph-finale {
+  padding: 64px 28px 72px;
+  display: none;
+  min-height: 100vh;
+  justify-content: center;
+}
+
+#ph-finale::before {
+  content: '';
+  position: fixed; inset: 0;
+  background: #060402;
+  z-index: -1;
+}
+
+.fin-inner {
+  width: min(480px, 90vw);
+  display: flex; flex-direction: column; align-items: center;
+  gap: 0;
+}
+
+.fin-deco {
+  display: flex; align-items: center; gap: 12px; width: 100%; margin-bottom: 32px;
+}
+.fin-deco .l { flex: 1; height: 0.5px; background: linear-gradient(90deg, transparent, var(--gold-dim)); }
+.fin-deco .r { flex: 1; height: 0.5px; background: linear-gradient(90deg, var(--gold-dim), transparent); }
+.fin-deco .d { width: 5px; height: 5px; background: var(--gold); transform: rotate(45deg); opacity: 0.25; }
+
+.fin-quote {
+  font-size: clamp(14px, 4vw, 17px); line-height: 2.4;
+  text-align: center; letter-spacing: 0.08em;
+  color: rgba(248,240,226,0.92); word-break: keep-all;
+  margin-bottom: 28px; font-weight: 300;
+}
+.fin-quote strong { color: var(--cream); font-weight: 700; display: block; font-size: 110%; margin: 4px 0; }
+.fin-quote em { color: var(--gold-l); font-style: normal; }
+
+.fin-sig {
+  font-family: 'Cormorant Garamond', serif; font-style: italic;
+  font-size: 18px; letter-spacing: 0.3em; color: var(--gold);
+  margin-bottom: 40px; opacity: 0.8;
+}
+
+/* 정보 요약 */
+.fin-info {
+  width: 100%; border: 0.5px solid rgba(201,168,76,0.25);
+  background: rgba(201,168,76,0.04); padding: 22px 24px; margin-bottom: 28px;
+}
+.fin-info-row {
+  display: flex; align-items: baseline; gap: 12px;
+  padding: 9px 0; border-bottom: 0.5px solid rgba(201,168,76,0.1);
+  font-size: 13.5px;
+}
+.fin-info-row:last-child { border-bottom: none; padding-bottom: 0; }
+.fin-info-row:first-child { padding-top: 0; }
+.fin-info-key {
+  color: var(--gold); font-size: 11px; letter-spacing: 0.12em;
+  flex-shrink: 0; min-width: 52px;
+}
+.fin-info-val { color: var(--cream); letter-spacing: 0.05em; line-height: 1.7; word-break: keep-all; }
+
+.fin-cta-btn {
+  background: transparent; border: 1px solid rgba(201,168,76,0.5);
+  color: var(--gold-l); cursor: pointer;
+  font-family: 'Noto Serif KR', serif; font-size: 14px; letter-spacing: 0.2em;
+  padding: 16px 48px; transition: all 0.4s ease; margin-bottom: 14px;
+  position: relative; overflow: hidden;
+}
+.fin-cta-btn::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(201,168,76,0.13), transparent);
+  opacity: 0; transition: opacity 0.4s;
+}
+.fin-cta-btn:hover { border-color: var(--gold); color: var(--cream); transform: translateY(-2px); }
+.fin-cta-btn:hover::before { opacity: 1; }
+
+.fin-ghost-btn {
+  background: transparent; border: none;
+  color: rgba(201,168,76,0.38); cursor: pointer;
+  font-family: 'Noto Serif KR', serif; font-size: 11px; letter-spacing: 0.18em;
+  padding: 8px; transition: color 0.3s;
+}
+.fin-ghost-btn:hover { color: rgba(201,168,76,0.7); }
+
+/* ════════════════════════════
+   공통 분리선
+════════════════════════════ */
+.gold-rule {
+  display: flex; align-items: center; gap: 10px; width: 100%; margin: 6px 0 26px;
+}
+.gold-rule .l { flex: 1; height: 0.5px; background: linear-gradient(90deg, transparent, var(--gold-dim)); }
+.gold-rule .r { flex: 1; height: 0.5px; background: linear-gradient(90deg, var(--gold-dim), transparent); }
+.gold-rule .d { width: 5px; height: 5px; background: var(--gold); transform: rotate(45deg); opacity: 0.4; }
+
+/* ════════════════════════════
+   애니메이션
+════════════════════════════ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes flickerRed {
+  0%, 100% { opacity: 1; }
+  45%  { opacity: 0.82; }
+  72%  { opacity: 0.93; }
+}
+@keyframes pulseRing {
+  0%   { opacity: 0.55; transform: scale(1); }
+  100% { opacity: 0;    transform: scale(1.1); }
+}
+@keyframes revealCard {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes typeIn {
+  from { opacity: 0; letter-spacing: 0.3em; }
+  to   { opacity: 1; letter-spacing: 0.06em; }
+}
+
+/* 스크롤바 */
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.2); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<canvas id="cvs"></canvas>
+
+<!-- ══════════════════
+     OPENING
+══════════════════ -->
+<div class="page" id="ph-opening">
+  <div class="op-top-label">Notice of Intrusion · 예고장</div>
+
+  <div class="op-deco">
+    <div class="l"></div>
+    <div class="d sm"></div><div class="d"></div><div class="d sm"></div>
+    <div class="l"></div>
+  </div>
+
+  <div class="op-date">Medical Festival · 메디컬 축제</div>
+
+  <div class="op-headline">
+    메디컬 축제가 한창이던 어느 날,<br>
+    <span class="hl">의과대학의 한 강의실</span>에서<br>
+    <span class="hl">비명소리</span>가 들린다.
+  </div>
+
+  <div class="op-alert">강의실에서 무슨 일이?</div>
+
+  <div class="op-qmark">?</div>
+
+  <div class="op-cta">
+    <div class="pulse-ring"></div>
+    <button class="op-cta-btn" onclick="showQA()">
+      질문을 통해 추리해보세요
+    </button>
+  </div>
+
+  <div class="op-scroll-hint">탭하여 시작 · tap to begin</div>
+</div>
+
+<!-- ══════════════════
+     Q&A
+══════════════════ -->
+<div class="page" id="ph-qa">
+  <div class="qa-inner">
+
+    <div class="qa-section-label">Investigation · 추리</div>
+
+    <div class="qa-prompt">
+      제시문 속 상황에 대해<br>
+      <strong>질문을 선택하면 답변이 공개됩니다.</strong>
+    </div>
+
+    <div class="qa-invite">무엇이 궁금하신가요?</div>
+
+    <div class="gold-rule">
+      <div class="l"></div><div class="d"></div><div class="r"></div>
+    </div>
+
+    <div class="q-grid" id="q-grid">
+      <!-- JS로 삽입 -->
+    </div>
+
+    <button class="ans-back-btn" onclick="showFinale()" style="margin-top:8px">
+      다음으로 →
+    </button>
+    <button class="fin-ghost-btn" onclick="showOpening()">← 처음으로</button>
+  </div>
+</div>
+
+<!-- ══════════════════
+     ANSWER
+══════════════════ -->
+<div class="page" id="ph-ans">
+  <div class="ans-inner">
+    <div class="ans-q-label">Answer · 답변</div>
+    <div class="ans-q-text" id="ans-q-text"></div>
+    <div class="ans-card">
+      <div class="ans-card-label">Discovery · 발견</div>
+      <div class="ans-card-body" id="ans-body"></div>
+    </div>
+    <button class="ans-back-btn" onclick="showQA()">← 다른 질문 보기</button>
+    <button class="fin-ghost-btn" onclick="showFinale()">끝으로 건너뛰기 →</button>
+  </div>
+</div>
+
+<!-- ══════════════════
+     FINALE
+══════════════════ -->
+<div class="page" id="ph-finale">
+  <div class="fin-inner">
+
+    <div class="fin-deco">
+      <div class="l"></div><div class="d"></div><div class="r"></div>
+    </div>
+
+    <div class="fin-quote">
+      <strong>소름 돋는 추리의 세계로<br>초대합니다.</strong>
+      <em>틀을 깨는 생각으로<br>진실에 다가가세요.</em>
+    </div>
+
+    <div class="fin-sig">— 앙상블</div>
+
+    <div class="gold-rule">
+      <div class="l"></div><div class="d"></div><div class="r"></div>
+    </div>
+
+    <div class="fin-info">
+      <div class="fin-info-row">
+        <div class="fin-info-key">📍 장소</div>
+        <div class="fin-info-val">의과대학 2층 M213</div>
+      </div>
+      <div class="fin-info-row">
+        <div class="fin-info-key">🎟 참가비</div>
+        <div class="fin-info-val">문제당 1,000원</div>
+      </div>
+      <div class="fin-info-row">
+        <div class="fin-info-key">🎁 상품</div>
+        <div class="fin-info-val">1등 신세계 상품권 3만원<br>뽑기 결과에 따라 다양한 경품</div>
+      </div>
+      <div class="fin-info-row">
+        <div class="fin-info-key">🐢 게임</div>
+        <div class="fin-info-val">바다거북 스프 추리 게임<br>문제는 랜덤 배정</div>
+      </div>
+    </div>
+
+    <button class="fin-cta-btn" onclick="showOpening()">
+      🐢 처음으로 돌아가기
+    </button>
+    <button class="fin-ghost-btn" onclick="showQA()">← 질문 다시 보기</button>
+
+  </div>
+</div>
+
+<script>
+/* ── 파티클 ── */
+const cvs = document.getElementById('cvs');
+const ctx = cvs.getContext('2d');
+let W, H;
+const pts = Array.from({length: 50}, () => ({
+  x: Math.random() * 1200, y: Math.random() * 900,
+  r: Math.random() * 1.1 + 0.3,
+  dx: (Math.random() - 0.5) * 0.22,
+  dy: -Math.random() * 0.3 - 0.08,
+  o: Math.random() * 0.38 + 0.05
+}));
+
+function resize() {
+  W = cvs.width  = window.innerWidth;
+  H = cvs.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+(function draw() {
+  ctx.clearRect(0, 0, W, H);
+  pts.forEach(p => {
+    p.x += p.dx; p.y += p.dy;
+    if (p.y < -8) { p.y = H + 8; p.x = Math.random() * W; }
+    if (p.x < 0)  p.x = W;
+    if (p.x > W)  p.x = 0;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(201,168,76,${p.o})`;
+    ctx.fill();
+  });
+  requestAnimationFrame(draw);
+})();
+
+/* ── Q&A 데이터 ── */
+const QA = [
+  {
+    icon: '💰',
+    q: '참가비가 얼마인가요?',
+    a: `참가비는 <em>문제 1개당 1,000원</em>입니다.<br>도전하고 싶은 만큼 여러 번 참여할 수 있어요.
+        <span class="ans-sub">📍 의과대학 2층 M213에서 현장 결제</span>`
+  },
+  {
+    icon: '📍',
+    q: '어디서 하는 게임인가요?',
+    a: `<em>의과대학 2층 M213</em> 강의실에서 진행됩니다.<br>메디컬 축제 기간 동안 운영되며, 바로 그 강의실이 오늘의 현장입니다.
+        <span class="ans-sub">🐢 앙상블 부스 · 스프의 맛</span>`
+  },
+  {
+    icon: '🎁',
+    q: '상품은 무엇인가요?',
+    a: `정답을 맞히면 <em>뽑기권 1장</em>을 드립니다.<br>뽑기 결과에 따라 다양한 경품이 기다리고 있으며,<br><em>1등 상품은 신세계 상품권 3만원</em>입니다!
+        <span class="ans-sub">🎖 1등만이 아니어도 다양한 경품 기회</span>`
+  },
+  {
+    icon: '🐢',
+    q: '게임이 무섭거나 어렵지 않나요?',
+    a: `걱정 마세요! 문제는 <em>랜덤</em>으로 배정되며,<br>무서운 문제만 있는 것이 아닙니다.<br>가볍고 재미있는 문제부터 반전 있는 문제까지 다양합니다.
+        <span class="ans-sub">❓ 예 / 아니오 / 모름으로 답하는 추리 게임</span>`
+  },
+  {
+    icon: '❓',
+    q: '어떻게 게임을 하나요?',
+    a: `제시문 하나가 주어집니다. 그 안에 숨겨진 진실을 <em>질문</em>만으로 추리해 내세요.<br>운영진은 <em>예 / 아니오 / 모름</em> 으로만 대답합니다.<br>진실에 도달하면 뽑기권 획득!
+        <span class="ans-sub">🎟 정답 시 뽑기권 1장 증정</span>`
+  }
+];
+
+/* ── 질문 버튼 렌더 ── */
+const grid = document.getElementById('q-grid');
+QA.forEach((item, i) => {
+  const btn = document.createElement('button');
+  btn.className = 'q-btn';
+  btn.innerHTML = `<span class="q-icon">${item.icon}</span><span class="q-num">${i+1}</span>${item.q}`;
+  btn.addEventListener('click', () => showAnswer(i));
+  grid.appendChild(btn);
+});
+
+/* ── 화면 전환 ── */
+function showPage(id) {
+  ['ph-opening','ph-qa','ph-ans','ph-finale'].forEach(pid => {
+    const el = document.getElementById(pid);
+    el.style.display = 'none';
+  });
+  const target = document.getElementById(id);
+  target.style.display = 'flex';
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function showOpening() { showPage('ph-opening'); }
+function showQA()      { showPage('ph-qa'); }
+function showFinale()  { showPage('ph-finale'); }
+
+function showAnswer(idx) {
+  const item = QA[idx];
+  document.getElementById('ans-q-text').textContent = item.q;
+  document.getElementById('ans-body').innerHTML     = item.a;
+  showPage('ph-ans');
+}
+</script>
+</body>
+</html>
